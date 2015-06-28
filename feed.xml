@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>JBake</title>
-    <link>http://jbake.org</link>
-    <atom:link href="http://jbake.org/feed.xml" rel="self" type="application/rss+xml" />
+    <link>http://hyunlabs.com</link>
+    <atom:link href="http://hyunlabs.com/feed.xml" rel="self" type="application/rss+xml" />
     <description>JBake Bootstrap Template</description>
     <language>en-gb</language>
-    <pubDate>Sun, 28 Jun 2015 12:11:30 -0400</pubDate>
-    <lastBuildDate>Sun, 28 Jun 2015 12:11:30 -0400</lastBuildDate>
+    <pubDate>Sun, 28 Jun 2015 12:17:02 -0400</pubDate>
+    <lastBuildDate>Sun, 28 Jun 2015 12:17:02 -0400</lastBuildDate>
 
     
     <item>
       <title>NYC Metrocard Fare Calculator</title>
-      <link>http://jbake.org/blog/2013/11/18/metro-card-fare-calculator.html</link>
+      <link>http://hyunlabs.com/blog/2013/11/18/metro-card-fare-calculator.html</link>
       <pubDate>Mon, 18 Nov 2013 00:00:00 -0500</pubDate>
       <guid isPermaLink="false">blog/2013/11/18/metro-card-fare-calculator.html</guid>
       <description>
@@ -241,7 +241,7 @@ It turns out they are rounding to the nearest hundredth place, so at least the b
     
     <item>
       <title>MySQL and Merge Tables</title>
-      <link>http://jbake.org/blog/2013/11/09/mysql-merge-tables.html</link>
+      <link>http://hyunlabs.com/blog/2013/11/09/mysql-merge-tables.html</link>
       <pubDate>Sat, 9 Nov 2013 00:00:00 -0500</pubDate>
       <guid isPermaLink="false">blog/2013/11/09/mysql-merge-tables.html</guid>
       <description>
