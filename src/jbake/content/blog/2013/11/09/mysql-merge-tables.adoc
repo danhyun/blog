@@ -1,0 +1,215 @@
+= MySQL and Merge Tables
+Danny Hyun
+2013-11-09
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: mysql, merge tables
+:idprefix:
+
+== tl;dr
+
+If you use MySQL as prescribed, everything should be OK.
+Failing that, you can learn some interesting things about how MySQL works.
+
+== Background
+
+MySQL's `MERGE` http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html[storage engine] is a neat way to address a specific type of problem.
+With the MyISAM storage engine, you lose `INSERT` performance as the table grows.
+Seeing that MyISAM uses table level locks for reads *and* writes, you'll quickly find that all your processes lock trying to query that table.
+Your application hangs while waiting for those queries to return and your site is now completely unusable.
+
+Fortunately, the `MERGE` storage engine is here to save the day.
+The actual `MERGE` table acts as a facade that unites a set of different tables that must share identical schemata.
+The `MERGE` schema itself differs only in that it must provide the `MERGE` storage engine type and declare insertion strategy.
+When your table is sufficiently large and you notice that your `INSERT` s start to stack up, all you have to do is create another table and append it to the list of merge tables defined in the `MERGE` table.
+
+One thing I didn't mention is that `MERGE` tables come with a http://dev.mysql.com/doc/refman/5.0/en/merge-table-problems.html[long list of problems] and http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html[caveats].
+
+The most important thing to note is that `MERGE` tables cannot enforce uniqueness constraints across the set of tables that form the `MERGE` table.
+Uniqueness is enforced on a per table basis, but there is nothing stopping you from `INSERT` -ing an entry with a key that violates a uniqueness constraint in a neighboring table.
+
+If you happen to miss this caveat, you will see some strange behavior.
+
+
+== Setup
+
+We'll create our database, two tables and a `MERGE` table that ties them together.
+
+[source, mysql]
+----
+DROP DATABASE IF EXISTS a; CREATE DATABASE a; USE a;
+CREATE TABLE `a_0` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+INSERT INTO a_0 (b, c) VALUES (1, 'hi'), (1, 'hi'), (1, 'hi');
+CREATE TABLE `a_1` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+INSERT INTO a_1 (b, c) VALUES (11, 'ho'), (12, 'ho'), (13, 'ho');
+CREATE TABLE `a` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`, `a_1`);
+----
+
+== Poking around
+
+Let's insert a row that violates the unique constraint defined by ``PRIMARY KEY (`b`,`c`)``
+
+[source, mysql]
+----
+INSERT INTO `a` (b, c) VALUES (1, 'hi');
+Query OK, 1 row affected (0.00 sec)
+----
+    
+Ok no surprises there. MySQL warned us that this would happen.
+Let's try some additional queries.
+
+[source, mysql]
+----
+SELECT * FROM a WHERE b=1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.00 sec)
+----
+
+Again no surprises. Let's try a query with the explicit primary key defintion.
+
+[source, mysql]
+----
+SELECT * FROM a WHERE b=1 and c='hi';
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)
+----
+    
+That's interesting... what happened to my other row that also had `b=1` and `c='hi'`?
+
+[source, mysql]
+----
+SELECT * FROM a WHERE b=1 and c='hi' AND id > 1;
+Empty set (0.00 sec)
+----
+    
+We know that a row with the same key exists in `a_1` but it's not being returned. What gives?
+
+[source, mysql]
+----
+mysql> EXPLAIN SELECT * FROM a WHERE b=1 and c='hi' AND id > 1;
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                                |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | Impossible WHERE noticed after reading const tables  |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+1 row in set (0.00 sec)
+----
+
+> Impossible `WHERE` noticed after reading const tables
+
+OK well what is a http://dev.mysql.com/doc/internals/en/optimizer-constants-constant-tables.html[`const table`]? It's a table of 0 or 1 rows that allows the query optimizer to treat the search parameters as constants.
+
+> const is used when you compare all parts of a PRIMARY KEY or UNIQUE index to constant values.
+
+So it looks like as long as your query contains all parts of a primary/unique constraint, the query optimizes to select against a table with 0 or 1 rows.
+
+Let's test that using queries that use all parts of the `PRIMARY KEY`.
+What do you think the following queries will return?
+
+[source, mysql]
+----
+SELECT * FROM a WHERE b=1 and c LIKE 'hi';
+SELECT * FROM a WHERE b LIKE 1 and c = 'hi';
+SELECT * FROM a WHERE b LIKE 1 and c LIKE 'hi';
+----
+    
+They all return both rows!
+
+[source, mysql]
+----
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.12 sec)
+----
+
+This gives us some insight into differences between `LIKE` and `=`. It seems `LIKE` will not use the `const table`.
+To use the `const table`, it's not enough to query using all parts of the `PRIMARY KEY`, but you must query using `=`.
+
+Let's go back to this query: `SELECT * FROM a WHERE b=1 and c='hi' AND id > 1;`
+    
+What if we altered the `MERGE` table to switch the ordering of the underlying tables?
+
+[source, mysql]
+----
+ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_1`,`a_0`);
+
+SELECT * FROM a WHERE b=1 and c='hi' AND id > 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)
+----
+
+We can conclude that `SELECT`s against `MERGE` tables using `const table` will stop searching subsequent tables in the `MERGE` list as long as it finds a row that satisfies the `PRIMARY KEY`.
+
+To verify that conclusion let's "undo" the `ALTER` to the `MERGE` table, `DELETE` the first row in `a_0` then force MySQL to use the `const table`.
+
+[source, mysql]
+----
+ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`,`a_1`);
+DELETE FROM `a_0` WHERE b=1 and c='hi';
+SELECT * FROM a WHERE b=1 and c='hi' AND id > 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)
+----
+    
+As expected.
+
+== One more thing
+
+I should note that I `DELETE` d from `a_0` and not `a`.
+`DELETE` -ing from `a` will find all rows that match and `DELETE` them.
+
+[source, mysql]
+----
+mysql> INSERT INTO `a_0` (id,b,c) VALUES (1, 1, 'hi');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT * FROM `a` WHERE b=1 and c='hi' AND id > 1;
+Empty set (0.00 sec)
+
+mysql> DELETE FROM `a` WHERE b=1 and c='hi';
+Query OK, 2 rows affected (0.00 sec)
+----
+
+`DELETE` s do not use the `const table`!

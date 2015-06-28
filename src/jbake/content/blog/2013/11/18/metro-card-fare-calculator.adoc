@@ -1,0 +1,72 @@
+= NYC Metrocard Fare Calculator
+Danny Hyun
+2013-11-18
+:jbake-type: post
+:jbake-status: published
+:jbake-tags: mysql, merge tables
+:idprefix:
+
+== tl;dr 
+
+I made a http://bl.ocks.org/danhyun/raw/7620351[fare calculator] that will tell you how much money you should put on your card given your current balance.
+
+'''
+
+Working in the city means having to travel within the city.
+Because the buildings are packed densely, you can choose from a wide array of transportation methods.
+Depending on a combination of parameters (distance, weather, $$$) you can choose how you will get from point A to point B.
+I've walked, biked, and taken the subway.
+
+The subway tends to be a reliable and relatively cheap option that stretches across all five boroughs of the city.
+It's not a 100% perfect solution but it gets the job done.
+There are however a list of grievances with using the subway.
+Fare hikes, crazy people, rude people, dirty stations, unplanned downtime are just a few items of note but for a low flat rate it's not that bad.
+
+With the latest http://web.mta.info/nyct/fare/FaresatAGlance.htm[fare hike of March 2013], there are a series of changes that prevent you from achieving a $0.00 balance without effort.
+You used to be able to walk up to an MTA MetroCard vending machine, feed it $20 and be able to use all of it.
+Now when you purchase a new card, it deducts $1 from your $20, applies a 5% bonus to the remaining $19 giving you a total balance of $19.95.
+A single subway ride is $2.50, meaning that a balance of $19.95 yields 7 rides.
+When those 7 rides are used, the remaining balance is $2.45.
+How annoying is that!
+That card is useless until you add more money.
+So you add another $20 and now your balance is $23.45 (good for 9 rides) which leaves you with a balance of $0.95 after those 9 rides are used.
+When are we ever going to have a $0 balance? 
+
+Unless you enjoy donating $2.45 to the MTA, you're going to be holding onto that card.
+That card will always have some strange, left-over, unusable balance that will keep haunting you every time you use the subway.
+If you hope to zero out your MetroCard simply by adding $20 every time you go to the vending machine, it will never happen.
+
+.The Cycle
+- Initial $20 has unusable balance of $2.45
+- Another $20 yields $23.45 with unusable balance of $0.95
+- Another $20 yields $21.95 with unusable balance of $1.95
+- Another $20 yields $22.95 with unusable balance of $0.45
+- Another $20 yields $21.45 with unusable balance of $1.45
+- Another $20 yields $22.45 with unusable balance of $2.45
+
+Oh look at that, you're back to a useless $2.45!
+The MTA is profiting from the breakage of discarded cards with remaining balances and new card fees.
+
+This isn't a problem without a solution.
+If you take a look at the http://web.mta.info/metrocard/mcgtreng.htm#payper[fare details], you get the high level view of how an MTA MetroCard vending machine works.
+You can only pay in increments of $0.05, any amount paid over $5 has a 5% bonus, and you must subtract $1 from the pre-bonus amount paid if the card you are crediting is a new card.
+
+So in regards to the initial $2.45 remaining balance you could quickly zero your card out by adding $0.05.
+However, you wouldn't be "benefiting" from the 5% bonus for payments over $5.
+
+With these simple rules, I made a http://http://bl.ocks.org/danhyun/raw/7620351[fare calculator] using a small bit of javascript, that will tell you how much money you should put on your card given your current balance.
+
+Here's the source:
+
+[source, html]
+.fare-calc.html
+----
+include::fare-calc.html[]
+----
+
+If you plan on traveling frequently within a given week or month, there are additional ways to optimize your MTA expenditure. The 7 day unlimited is $30 and the 30 day unlimited is $112. If you find yourself paying more than these amounts on your card you should consider getting an unlimited card if your card is going to be used very frequently.
+
+== Notes
+
+As I was testing my fare calculator, I assumed that the MTA would simply truncate values after the hundredth's place.
+It turns out they are rounding to the nearest hundredth place, so at least the bonus calculation is fair.
