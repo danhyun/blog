@@ -30,6 +30,11 @@ watch {
   }
 }
 
+task publish(type: GradleBuild) {
+  buildFile = 'publish.gradle'
+  tasks = ['publishGhPages']
+}
+
 idea {
   project {
     jdkName "1.8"
