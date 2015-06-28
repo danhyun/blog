@@ -1,0 +1,509 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JBake</title>
+    <link>http://jbake.org</link>
+    <atom:link href="http://jbake.org/feed.xml" rel="self" type="application/rss+xml" />
+    <description>JBake Bootstrap Template</description>
+    <language>en-gb</language>
+    <pubDate>Sun, 28 Jun 2015 12:11:30 -0400</pubDate>
+    <lastBuildDate>Sun, 28 Jun 2015 12:11:30 -0400</lastBuildDate>
+
+    
+    <item>
+      <title>NYC Metrocard Fare Calculator</title>
+      <link>http://jbake.org/blog/2013/11/18/metro-card-fare-calculator.html</link>
+      <pubDate>Mon, 18 Nov 2013 00:00:00 -0500</pubDate>
+      <guid isPermaLink="false">blog/2013/11/18/metro-card-fare-calculator.html</guid>
+      <description>
+      &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;tl_dr&quot;&gt;tl;dr&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I made a &lt;a href=&quot;http://bl.ocks.org/danhyun/raw/7620351&quot;&gt;fare calculator&lt;/a&gt; that will tell you how much money you should put on your card given your current balance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;hr&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Working in the city means having to travel within the city.
+Because the buildings are packed densely, you can choose from a wide array of transportation methods.
+Depending on a combination of parameters (distance, weather, $$$) you can choose how you will get from point A to point B.
+I&amp;#8217;ve walked, biked, and taken the subway.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The subway tends to be a reliable and relatively cheap option that stretches across all five boroughs of the city.
+It&amp;#8217;s not a 100% perfect solution but it gets the job done.
+There are however a list of grievances with using the subway.
+Fare hikes, crazy people, rude people, dirty stations, unplanned downtime are just a few items of note but for a low flat rate it&amp;#8217;s not that bad.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With the latest &lt;a href=&quot;http://web.mta.info/nyct/fare/FaresatAGlance.htm&quot;&gt;fare hike of March 2013&lt;/a&gt;, there are a series of changes that prevent you from achieving a $0.00 balance without effort.
+You used to be able to walk up to an MTA MetroCard vending machine, feed it $20 and be able to use all of it.
+Now when you purchase a new card, it deducts $1 from your $20, applies a 5% bonus to the remaining $19 giving you a total balance of $19.95.
+A single subway ride is $2.50, meaning that a balance of $19.95 yields 7 rides.
+When those 7 rides are used, the remaining balance is $2.45.
+How annoying is that!
+That card is useless until you add more money.
+So you add another $20 and now your balance is $23.45 (good for 9 rides) which leaves you with a balance of $0.95 after those 9 rides are used.
+When are we ever going to have a $0 balance?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unless you enjoy donating $2.45 to the MTA, you&amp;#8217;re going to be holding onto that card.
+That card will always have some strange, left-over, unusable balance that will keep haunting you every time you use the subway.
+If you hope to zero out your MetroCard simply by adding $20 every time you go to the vending machine, it will never happen.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;The Cycle&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Initial $20 has unusable balance of $2.45&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Another $20 yields $23.45 with unusable balance of $0.95&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Another $20 yields $21.95 with unusable balance of $1.95&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Another $20 yields $22.95 with unusable balance of $0.45&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Another $20 yields $21.45 with unusable balance of $1.45&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Another $20 yields $22.45 with unusable balance of $2.45&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Oh look at that, you&amp;#8217;re back to a useless $2.45!
+The MTA is profiting from the breakage of discarded cards with remaining balances and new card fees.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This isn&amp;#8217;t a problem without a solution.
+If you take a look at the &lt;a href=&quot;http://web.mta.info/metrocard/mcgtreng.htm#payper&quot;&gt;fare details&lt;/a&gt;, you get the high level view of how an MTA MetroCard vending machine works.
+You can only pay in increments of $0.05, any amount paid over $5 has a 5% bonus, and you must subtract $1 from the pre-bonus amount paid if the card you are crediting is a new card.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So in regards to the initial $2.45 remaining balance you could quickly zero your card out by adding $0.05.
+However, you wouldn&amp;#8217;t be &quot;benefiting&quot; from the 5% bonus for payments over $5.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;With these simple rules, I made a &lt;a href=&quot;http://http://bl.ocks.org/danhyun/raw/7620351&quot;&gt;fare calculator&lt;/a&gt; using a small bit of javascript, that will tell you how much money you should put on your card given your current balance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here&amp;#8217;s the source:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;fare-calc.html&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&amp;lt;!doctype html&amp;gt;
+&amp;lt;html lang=&quot;en&quot;&amp;gt;
+&amp;lt;head&amp;gt;
+  &amp;lt;meta charset=&quot;utf-8&quot;&amp;gt;
+  &amp;lt;title&amp;gt;MTA Fare Calculator&amp;lt;/title&amp;gt;
+  &amp;lt;link rel=&quot;stylesheet&quot; href=&quot;http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css&quot;&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;div class=&quot;container&quot;&amp;gt;
+  &amp;lt;div class=&quot;header&quot;&amp;gt;
+    &amp;lt;h3&amp;gt;MTA Fare Calculator&amp;lt;/h3&amp;gt;
+  &amp;lt;/div&amp;gt;
+  &amp;lt;form class=&quot;form-horizontal&quot; role=&quot;form&quot;&amp;gt;
+    &amp;lt;div class=&quot;form-group&quot;&amp;gt;
+      &amp;lt;div class=&quot;col-sm-offset-2 col-sm-10&quot;&amp;gt;
+        &amp;lt;div class=&quot;radio&quot;&amp;gt;
+          &amp;lt;label&amp;gt;&amp;lt;input type=&quot;radio&quot; name=&quot;cardType&quot; value=&quot;new&quot; checked&amp;gt; New Card ($1.00 fee)&amp;lt;/label&amp;gt;
+        &amp;lt;/div&amp;gt;
+      &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;div class=&quot;form-group&quot;&amp;gt;
+      &amp;lt;div class=&quot;col-sm-offset-2 col-sm-10&quot;&amp;gt;
+        &amp;lt;div class=&quot;radio&quot;&amp;gt;
+          &amp;lt;label&amp;gt;&amp;lt;input type=&quot;radio&quot; name=&quot;cardType&quot; value=&quot;existing&quot;&amp;gt; Existing Card&amp;lt;/label&amp;gt;
+        &amp;lt;/div&amp;gt;
+      &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;div class=&quot;form-group&quot;&amp;gt;
+      &amp;lt;label for=&quot;existingBalance&quot; class=&quot;col-sm-2 control-label&quot;&amp;gt;Existing balance&amp;lt;/label&amp;gt;
+      &amp;lt;div class=&quot;col-sm-10&quot;&amp;gt;
+        &amp;lt;input id=&quot;existingBalance&quot; name=&quot;existingBalance&quot; class=&quot;form-control&quot; type=&quot;number&quot; placeholder=&quot;Existing balance&quot; disabled value=&quot;0&quot; min=0 max=1000 step=0.01&amp;gt;
+      &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;div class=&quot;form-group&quot;&amp;gt;
+      &amp;lt;div class=&quot;col-sm-offset-2 col-sm-10&quot;&amp;gt;
+        &amp;lt;button class=&quot;btn btn-primary&quot; type=&quot;submit&quot;&amp;gt;Calculate&amp;lt;/button&amp;gt;
+      &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+  &amp;lt;/form&amp;gt;
+
+  &amp;lt;div class=&quot;row&quot;&amp;gt;
+    &amp;lt;div class=&quot;col-sm-offset-2 col-sm-10&quot;&amp;gt;
+      &amp;lt;table class=&quot;table table-condensed table-hover&quot;&amp;gt;
+        &amp;lt;thead&amp;gt;&amp;lt;tr&amp;gt;&amp;lt;th&amp;gt;You should pay&amp;lt;/th&amp;gt;&amp;lt;th&amp;gt;With Bonus&amp;lt;/th&amp;gt;&amp;lt;th&amp;gt;For Balance&amp;lt;/th&amp;gt;&amp;lt;th&amp;gt;Number of rides&amp;lt;/th&amp;gt;&amp;lt;/tr&amp;gt;&amp;lt;/thead&amp;gt;
+        &amp;lt;tbody&amp;gt;&amp;lt;/tbody&amp;gt;
+      &amp;lt;/table&amp;gt;
+    &amp;lt;/div&amp;gt;
+  &amp;lt;/div&amp;gt;
+&amp;lt;/div&amp;gt;
+
+&amp;lt;script src=&quot;https://code.jquery.com/jquery.min.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;script&amp;gt;
+  (function() {
+
+    var baseFare = 2.50;
+    var newCardFee = 1.00;
+    var minAmountForBonus=5;
+    var bonus=0.05;
+    var machineIncrements = 0.05;
+
+    var cash = function(credit, existing) {
+      existing = isNaN(existing) ? 0 : parseFloat(existing);
+      var amountBonus = 0;
+      if (credit &amp;gt;= minAmountForBonus) {
+        amountBonus = parseFloat((credit * bonus).toFixed(2));
+      }
+      var newBalance = credit + amountBonus + existing;
+      return  {
+        whatToPay: credit,
+        bonus: amountBonus,
+        balance: newBalance
+      };
+    };
+
+    $(&apos;body&apos;).on(&apos;submit&apos;, &apos;form&apos;, function(e) {
+      e.preventDefault();
+
+      var form = $(this).serialize().split(&quot;&amp;amp;&quot;);
+
+      var existingBalance = $(&apos;#existingBalance:not([disabled])&apos;).val() || 0;
+
+      var isNewCard = $(&apos;input[name=&quot;cardType&quot;]:checked&apos;).val() === &apos;new&apos;;
+
+      var tbody = $(&apos;tbody&apos;).empty();
+
+      var amount = machineIncrements;
+      var i = 0;
+      while (amount &amp;lt; 120) {
+        var credit = parseFloat((i++ * machineIncrements).toFixed(2));
+        var card = cash(credit, existingBalance);
+        var amount = card.whatToPay;
+        if (isNewCard) {
+          amount += 1;
+        }
+
+        if (amount &amp;gt; 0) {
+          var trips = parseFloat(card.balance.toFixed(2)) / baseFare;
+          if (trips &amp;gt; 0 &amp;amp;&amp;amp; trips % 1 === 0) {
+            var contents = [&apos;$&apos; + amount.toFixed(2), &apos;$&apos; + card.bonus.toFixed(2), &apos;$&apos; + card.balance.toFixed(2), trips].join(&apos;&amp;lt;/td&amp;gt;&amp;lt;td&amp;gt;&apos;);
+            tbody.append([&apos;&amp;lt;tr&amp;gt;&amp;lt;td&amp;gt;&apos;, contents, &apos;&amp;lt;/td&amp;gt;&amp;lt;/tr&amp;gt;&apos;].join(&apos;&apos;));
+          }
+        }
+      }
+    });
+
+    $(&apos;body&apos;).on(&apos;change&apos;, &apos;input[name=&quot;cardType&quot;]&apos;, function() {
+      var existing = this.value ===&apos;existing&apos;;
+
+      if (existing &amp;amp;&amp;amp; $(this).is(&apos;:checked&apos;)) {
+        $(&apos;#existingBalance&apos;).removeAttr(&apos;disabled&apos;).focus();
+      } else {
+        $(&apos;#existingBalance&apos;).attr(&apos;disabled&apos;, true);
+      }
+
+    });
+
+  })();
+&amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you plan on traveling frequently within a given week or month, there are additional ways to optimize your MTA expenditure. The 7 day unlimited is $30 and the 30 day unlimited is $112. If you find yourself paying more than these amounts on your card you should consider getting an unlimited card if your card is going to be used very frequently.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I was testing my fare calculator, I assumed that the MTA would simply truncate values after the hundredth&amp;#8217;s place.
+It turns out they are rounding to the nearest hundredth place, so at least the bonus calculation is fair.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	  </description>
+    </item>
+    
+    <item>
+      <title>MySQL and Merge Tables</title>
+      <link>http://jbake.org/blog/2013/11/09/mysql-merge-tables.html</link>
+      <pubDate>Sat, 9 Nov 2013 00:00:00 -0500</pubDate>
+      <guid isPermaLink="false">blog/2013/11/09/mysql-merge-tables.html</guid>
+      <description>
+      &lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;tl_dr&quot;&gt;tl;dr&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you use MySQL as prescribed, everything should be OK.
+Failing that, you can learn some interesting things about how MySQL works.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;MySQL&amp;#8217;s &lt;code&gt;MERGE&lt;/code&gt; &lt;a href=&quot;http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html&quot;&gt;storage engine&lt;/a&gt; is a neat way to address a specific type of problem.
+With the MyISAM storage engine, you lose &lt;code&gt;INSERT&lt;/code&gt; performance as the table grows.
+Seeing that MyISAM uses table level locks for reads &lt;strong&gt;and&lt;/strong&gt; writes, you&amp;#8217;ll quickly find that all your processes lock trying to query that table.
+Your application hangs while waiting for those queries to return and your site is now completely unusable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Fortunately, the &lt;code&gt;MERGE&lt;/code&gt; storage engine is here to save the day.
+The actual &lt;code&gt;MERGE&lt;/code&gt; table acts as a facade that unites a set of different tables that must share identical schemata.
+The &lt;code&gt;MERGE&lt;/code&gt; schema itself differs only in that it must provide the &lt;code&gt;MERGE&lt;/code&gt; storage engine type and declare insertion strategy.
+When your table is sufficiently large and you notice that your &lt;code&gt;INSERT&lt;/code&gt; s start to stack up, all you have to do is create another table and append it to the list of merge tables defined in the &lt;code&gt;MERGE&lt;/code&gt; table.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;One thing I didn&amp;#8217;t mention is that &lt;code&gt;MERGE&lt;/code&gt; tables come with a &lt;a href=&quot;http://dev.mysql.com/doc/refman/5.0/en/merge-table-problems.html&quot;&gt;long list of problems&lt;/a&gt; and &lt;a href=&quot;http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html&quot;&gt;caveats&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The most important thing to note is that &lt;code&gt;MERGE&lt;/code&gt; tables cannot enforce uniqueness constraints across the set of tables that form the &lt;code&gt;MERGE&lt;/code&gt; table.
+Uniqueness is enforced on a per table basis, but there is nothing stopping you from &lt;code&gt;INSERT&lt;/code&gt; -ing an entry with a key that violates a uniqueness constraint in a neighboring table.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you happen to miss this caveat, you will see some strange behavior.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We&amp;#8217;ll create our database, two tables and a &lt;code&gt;MERGE&lt;/code&gt; table that ties them together.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;DROP DATABASE IF EXISTS a; CREATE DATABASE a; USE a;
+CREATE TABLE `a_0` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT &apos;0&apos;,
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+INSERT INTO a_0 (b, c) VALUES (1, &apos;hi&apos;), (1, &apos;hi&apos;), (1, &apos;hi&apos;);
+CREATE TABLE `a_1` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT &apos;0&apos;,
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+INSERT INTO a_1 (b, c) VALUES (11, &apos;ho&apos;), (12, &apos;ho&apos;), (13, &apos;ho&apos;);
+CREATE TABLE `a` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT &apos;0&apos;,
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`, `a_1`);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;poking_around&quot;&gt;Poking around&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s insert a row that violates the unique constraint defined by &lt;code&gt;PRIMARY KEY (&lt;code&gt;b&lt;/code&gt;,&lt;code&gt;c&lt;/code&gt;)&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;INSERT INTO `a` (b, c) VALUES (1, &apos;hi&apos;);
+Query OK, 1 row affected (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ok no surprises there. MySQL warned us that this would happen.
+Let&amp;#8217;s try some additional queries.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;SELECT * FROM a WHERE b=1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Again no surprises. Let&amp;#8217;s try a query with the explicit primary key defintion.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;SELECT * FROM a WHERE b=1 and c=&apos;hi&apos;;
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That&amp;#8217;s interesting&amp;#8230;&amp;#8203; what happened to my other row that also had &lt;code&gt;b=1&lt;/code&gt; and &lt;code&gt;c=&apos;hi&apos;&lt;/code&gt;?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;SELECT * FROM a WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;
+Empty set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We know that a row with the same key exists in &lt;code&gt;a_1&lt;/code&gt; but it&amp;#8217;s not being returned. What gives?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;mysql&amp;gt; EXPLAIN SELECT * FROM a WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                                |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | Impossible WHERE noticed after reading const tables  |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+1 row in set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Impossible &lt;code&gt;WHERE&lt;/code&gt; noticed after reading const tables&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;OK well what is a &lt;a href=&quot;http://dev.mysql.com/doc/internals/en/optimizer-constants-constant-tables.html&quot;&gt;&lt;code&gt;const table&lt;/code&gt;&lt;/a&gt;? It&amp;#8217;s a table of 0 or 1 rows that allows the query optimizer to treat the search parameters as constants.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;quoteblock&quot;&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;const is used when you compare all parts of a PRIMARY KEY or UNIQUE index to constant values.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So it looks like as long as your query contains all parts of a primary/unique constraint, the query optimizes to select against a table with 0 or 1 rows.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s test that using queries that use all parts of the &lt;code&gt;PRIMARY KEY&lt;/code&gt;.
+What do you think the following queries will return?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;SELECT * FROM a WHERE b=1 and c LIKE &apos;hi&apos;;
+SELECT * FROM a WHERE b LIKE 1 and c = &apos;hi&apos;;
+SELECT * FROM a WHERE b LIKE 1 and c LIKE &apos;hi&apos;;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;They all return both rows!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;+----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.12 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This gives us some insight into differences between &lt;code&gt;LIKE&lt;/code&gt; and &lt;code&gt;=&lt;/code&gt;. It seems &lt;code&gt;LIKE&lt;/code&gt; will not use the &lt;code&gt;const table&lt;/code&gt;.
+To use the &lt;code&gt;const table&lt;/code&gt;, it&amp;#8217;s not enough to query using all parts of the &lt;code&gt;PRIMARY KEY&lt;/code&gt;, but you must query using &lt;code&gt;=&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s go back to this query: &lt;code&gt;SELECT * FROM a WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What if we altered the &lt;code&gt;MERGE&lt;/code&gt; table to switch the ordering of the underlying tables?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_1`,`a_0`);
+
+SELECT * FROM a WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can conclude that &lt;code&gt;SELECT`s against `MERGE&lt;/code&gt; tables using &lt;code&gt;const table&lt;/code&gt; will stop searching subsequent tables in the &lt;code&gt;MERGE&lt;/code&gt; list as long as it finds a row that satisfies the &lt;code&gt;PRIMARY KEY&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To verify that conclusion let&amp;#8217;s &quot;undo&quot; the &lt;code&gt;ALTER&lt;/code&gt; to the &lt;code&gt;MERGE&lt;/code&gt; table, &lt;code&gt;DELETE&lt;/code&gt; the first row in &lt;code&gt;a_0&lt;/code&gt; then force MySQL to use the &lt;code&gt;const table&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`,`a_1`);
+DELETE FROM `a_0` WHERE b=1 and c=&apos;hi&apos;;
+SELECT * FROM a WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As expected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;one_more_thing&quot;&gt;One more thing&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I should note that I &lt;code&gt;DELETE&lt;/code&gt; d from &lt;code&gt;a_0&lt;/code&gt; and not &lt;code&gt;a&lt;/code&gt;.
+&lt;code&gt;DELETE&lt;/code&gt; -ing from &lt;code&gt;a&lt;/code&gt; will find all rows that match and &lt;code&gt;DELETE&lt;/code&gt; them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;prettyprint highlight&quot;&gt;&lt;code class=&quot;language-mysql&quot; data-lang=&quot;mysql&quot;&gt;mysql&amp;gt; INSERT INTO `a_0` (id,b,c) VALUES (1, 1, &apos;hi&apos;);
+Query OK, 1 row affected (0.00 sec)
+
+mysql&amp;gt; SELECT * FROM `a` WHERE b=1 and c=&apos;hi&apos; AND id &amp;gt; 1;
+Empty set (0.00 sec)
+
+mysql&amp;gt; DELETE FROM `a` WHERE b=1 and c=&apos;hi&apos;;
+Query OK, 2 rows affected (0.00 sec)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;DELETE&lt;/code&gt; s do not use the &lt;code&gt;const table&lt;/code&gt;!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+	  </description>
+    </item>
+    
+
+  </channel> 
+</rss>

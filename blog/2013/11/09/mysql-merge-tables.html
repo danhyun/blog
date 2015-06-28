@@ -1,0 +1,368 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>MySQL and Merge Tables</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <meta name="generator" content="JBake">
+
+  <!-- Le styles -->
+  
+  
+  <link href="../../../../css/normalize.css" rel="stylesheet">
+  
+  <link href="../../../../css/asciidoctor.css" rel="stylesheet">
+  
+  <link href="../../../../css/base.css" rel="stylesheet">
+  
+  <link href="../../../../css/main.css" rel="stylesheet">
+  
+  <link href="../../../../css/prettify.css" rel="stylesheet">
+  
+
+  <link rel="apple-touch-icon" sizes="57x57" href="../../../../apple-touch-icon-57x57.png"/>
+  <link rel="apple-touch-icon" sizes="60x60" href="../../../../apple-touch-icon-60x60.png"/>
+  <link rel="apple-touch-icon" sizes="72x72" href="../../../../apple-touch-icon-72x72.png"/>
+  <link rel="apple-touch-icon" sizes="76x76" href="../../../../apple-touch-icon-76x76.png"/>
+  <link rel="apple-touch-icon" sizes="114x114" href="../../../../apple-touch-icon-114x114.png"/>
+  <link rel="apple-touch-icon" sizes="120x120" href="../../../../apple-touch-icon-120x120.png"/>
+  <link rel="apple-touch-icon" sizes="144x144" href="../../../../apple-touch-icon-144x144.png"/>
+  <link rel="apple-touch-icon" sizes="152x152" href="../../../../apple-touch-icon-152x152.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon-180x180.png"/>
+  <link rel="icon" type="image/png" href="../../../../favicon-32x32.png" sizes="32x32"/>
+  <link rel="icon" type="image/png" href="../../../../android-chrome-192x192.png" sizes="192x192"/>
+  <link rel="icon" type="image/png" href="../../../../favicon-96x96.png" sizes="96x96"/>
+  <link rel="icon" type="image/png" href="../../../../favicon-16x16.png" sizes="16x16"/>
+  <link rel="manifest" href="../../../../manifest.json"/>
+  <meta name="msapplication-TileColor" content="#da532c"/>
+  <meta name="msapplication-TileImage" content="/mstile-144x144.png"/>
+  <meta name="theme-color" content="#ffffff"/>
+
+</head>
+<body onload="prettyPrint()">
+  <div id="wrap">
+
+
+		<!-- Fixed navbar -->
+    <nav>
+      <ul class="navigation">
+        <li><a href="../../../../">Home</a></li>
+        <li><a href="../../../../about.html">About</a></li>
+        <li><a href="../../../../feed.xml">Feed</a></li>
+        <li><a href="https://github.com/danhyun" target="_blank"><i class="icon-2x icon-github"></i></a></li>
+        <li><a href="https://twitter.com/Lspacewalker" target="_blank"><i class="icon-2x icon-twitter"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/danhyun" target="_blank"><i class="icon-2x icon-linkedin"></i></a></li>
+      </ul>
+    </nav>
+    <div class="container">
+
+
+  <article>
+    <div class="page-header">
+      <h1>MySQL and Merge Tables</h1>
+      <div class="article-date"><em>09 November, 2013</em></div>
+    </div>
+
+    <p><div class="sect1">
+<h2 id="tl_dr">tl;dr</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you use MySQL as prescribed, everything should be OK.
+Failing that, you can learn some interesting things about how MySQL works.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="background">Background</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>MySQL&#8217;s <code>MERGE</code> <a href="http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html">storage engine</a> is a neat way to address a specific type of problem.
+With the MyISAM storage engine, you lose <code>INSERT</code> performance as the table grows.
+Seeing that MyISAM uses table level locks for reads <strong>and</strong> writes, you&#8217;ll quickly find that all your processes lock trying to query that table.
+Your application hangs while waiting for those queries to return and your site is now completely unusable.</p>
+</div>
+<div class="paragraph">
+<p>Fortunately, the <code>MERGE</code> storage engine is here to save the day.
+The actual <code>MERGE</code> table acts as a facade that unites a set of different tables that must share identical schemata.
+The <code>MERGE</code> schema itself differs only in that it must provide the <code>MERGE</code> storage engine type and declare insertion strategy.
+When your table is sufficiently large and you notice that your <code>INSERT</code> s start to stack up, all you have to do is create another table and append it to the list of merge tables defined in the <code>MERGE</code> table.</p>
+</div>
+<div class="paragraph">
+<p>One thing I didn&#8217;t mention is that <code>MERGE</code> tables come with a <a href="http://dev.mysql.com/doc/refman/5.0/en/merge-table-problems.html">long list of problems</a> and <a href="http://dev.mysql.com/doc/refman/5.0/en/merge-table-advantages.html">caveats</a>.</p>
+</div>
+<div class="paragraph">
+<p>The most important thing to note is that <code>MERGE</code> tables cannot enforce uniqueness constraints across the set of tables that form the <code>MERGE</code> table.
+Uniqueness is enforced on a per table basis, but there is nothing stopping you from <code>INSERT</code> -ing an entry with a key that violates a uniqueness constraint in a neighboring table.</p>
+</div>
+<div class="paragraph">
+<p>If you happen to miss this caveat, you will see some strange behavior.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="setup">Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;ll create our database, two tables and a <code>MERGE</code> table that ties them together.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">DROP DATABASE IF EXISTS a; CREATE DATABASE a; USE a;
+CREATE TABLE `a_0` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+INSERT INTO a_0 (b, c) VALUES (1, 'hi'), (1, 'hi'), (1, 'hi');
+CREATE TABLE `a_1` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+INSERT INTO a_1 (b, c) VALUES (11, 'ho'), (12, 'ho'), (13, 'ho');
+CREATE TABLE `a` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `b` bigint(20) NOT NULL DEFAULT '0',
+  `c` varchar(512) NOT NULL,
+  PRIMARY KEY (`b`,`c`),
+  KEY `c` (`c`(32)),
+  KEY `id` (`id`)
+) ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`, `a_1`);</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="poking_around">Poking around</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s insert a row that violates the unique constraint defined by <code>PRIMARY KEY (<code>b</code>,<code>c</code>)</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">INSERT INTO `a` (b, c) VALUES (1, 'hi');
+Query OK, 1 row affected (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ok no surprises there. MySQL warned us that this would happen.
+Let&#8217;s try some additional queries.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">SELECT * FROM a WHERE b=1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again no surprises. Let&#8217;s try a query with the explicit primary key defintion.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">SELECT * FROM a WHERE b=1 and c='hi';
++----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s interesting&#8230;&#8203; what happened to my other row that also had <code>b=1</code> and <code>c='hi'</code>?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">SELECT * FROM a WHERE b=1 and c='hi' AND id &gt; 1;
+Empty set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We know that a row with the same key exists in <code>a_1</code> but it&#8217;s not being returned. What gives?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">mysql&gt; EXPLAIN SELECT * FROM a WHERE b=1 and c='hi' AND id &gt; 1;
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                                |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | Impossible WHERE noticed after reading const tables  |
++----+-------------+-------+------+---------------+------+---------+------+------+------------------------------------------------------+
+1 row in set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Impossible <code>WHERE</code> noticed after reading const tables</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>OK well what is a <a href="http://dev.mysql.com/doc/internals/en/optimizer-constants-constant-tables.html"><code>const table</code></a>? It&#8217;s a table of 0 or 1 rows that allows the query optimizer to treat the search parameters as constants.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>const is used when you compare all parts of a PRIMARY KEY or UNIQUE index to constant values.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>So it looks like as long as your query contains all parts of a primary/unique constraint, the query optimizes to select against a table with 0 or 1 rows.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s test that using queries that use all parts of the <code>PRIMARY KEY</code>.
+What do you think the following queries will return?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">SELECT * FROM a WHERE b=1 and c LIKE 'hi';
+SELECT * FROM a WHERE b LIKE 1 and c = 'hi';
+SELECT * FROM a WHERE b LIKE 1 and c LIKE 'hi';</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>They all return both rows!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">+----+---+----+
+| id | b | c  |
++----+---+----+
+|  1 | 1 | hi |
+| 14 | 1 | hi |
++----+---+----+
+2 rows in set (0.12 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This gives us some insight into differences between <code>LIKE</code> and <code>=</code>. It seems <code>LIKE</code> will not use the <code>const table</code>.
+To use the <code>const table</code>, it&#8217;s not enough to query using all parts of the <code>PRIMARY KEY</code>, but you must query using <code>=</code>.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s go back to this query: <code>SELECT * FROM a WHERE b=1 and c='hi' AND id &gt; 1;</code></p>
+</div>
+<div class="paragraph">
+<p>What if we altered the <code>MERGE</code> table to switch the ordering of the underlying tables?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_1`,`a_0`);
+
+SELECT * FROM a WHERE b=1 and c='hi' AND id &gt; 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can conclude that <code>SELECT`s against `MERGE</code> tables using <code>const table</code> will stop searching subsequent tables in the <code>MERGE</code> list as long as it finds a row that satisfies the <code>PRIMARY KEY</code>.</p>
+</div>
+<div class="paragraph">
+<p>To verify that conclusion let&#8217;s "undo" the <code>ALTER</code> to the <code>MERGE</code> table, <code>DELETE</code> the first row in <code>a_0</code> then force MySQL to use the <code>const table</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">ALTER TABLE `a` ENGINE=MRG_MyISAM DEFAULT CHARSET=latin1 INSERT_METHOD=LAST UNION=(`a_0`,`a_1`);
+DELETE FROM `a_0` WHERE b=1 and c='hi';
+SELECT * FROM a WHERE b=1 and c='hi' AND id &gt; 1;
++----+---+----+
+| id | b | c  |
++----+---+----+
+| 14 | 1 | hi |
++----+---+----+
+1 row in set (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As expected.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="one_more_thing">One more thing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I should note that I <code>DELETE</code> d from <code>a_0</code> and not <code>a</code>.
+<code>DELETE</code> -ing from <code>a</code> will find all rows that match and <code>DELETE</code> them.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-mysql" data-lang="mysql">mysql&gt; INSERT INTO `a_0` (id,b,c) VALUES (1, 1, 'hi');
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; SELECT * FROM `a` WHERE b=1 and c='hi' AND id &gt; 1;
+Empty set (0.00 sec)
+
+mysql&gt; DELETE FROM `a` WHERE b=1 and c='hi';
+Query OK, 2 rows affected (0.00 sec)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>DELETE</code> s do not use the <code>const table</code>!</p>
+</div>
+</div>
+</div></p>
+  </article>
+
+	<hr />
+
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'hyunlabs';
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+		</div>
+		<div id="push"></div>
+    </div>
+
+    <footer id="footer">
+      <div class="container">
+        <p class="muted credit">&copy; 2013-2015 | Baked with <a href="http://jbake.org">JBake v2.3.2</a></p>
+      </div>
+    </footer>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="../../../../js/jquery-1.11.1.min.js"></script>
+    <script src="../../../../js/prettify.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-22599661-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+  </body>
+</html>
+
