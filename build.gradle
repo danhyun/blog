@@ -30,6 +30,8 @@ watch {
   }
 }
 
+System.setProperty('jna.nosys', 'true')
+
 task publish(dependsOn: 'jbake', type: GradleBuild) {
   buildFile = 'publish.gradle'
   tasks = ['publishGhPages']

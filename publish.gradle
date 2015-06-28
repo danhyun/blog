@@ -10,9 +10,12 @@ buildscript {
 
 apply plugin: 'org.ajoberstar.github-pages'
 
+System.setProperty('jna.nosys', 'true')
+
 githubPages {
   def token = System.getProperty('GH_TOKEN')
   repoUri = 'https://${token}@github.com/danhyun/blog.git'
+//  repoUri = 'git@github.com:danhyun/blog.git'
   pages {
     from file("$buildDir/jbake")
   }
