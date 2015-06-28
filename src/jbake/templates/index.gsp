@@ -11,8 +11,10 @@
     <a href="${post.uri}"><h1>${post.title}</h1></a>
     <div class="article-date"><em>${post.date.format("dd MMMM, yyyy")}</em></div>
     <% def words = post.body.split(' ')%>
-    <% def body = words.size() > 50 ? (words[0..50] + ["&hellip;"]) : words %>
-		<p><%=body.join(' ')%></p>
+    <% def body = words.size() > 50 ? (words[0..50] + ["<a href='${post.uri}'>&hellip; continue reading &rarr;</a>"]) : words %>
+		<div class="article-preview">
+      <p>${body.join(' ')}</p>
+    </div>
   </article>
   <%}%>
 

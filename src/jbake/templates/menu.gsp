@@ -1,7 +1,7 @@
 	<!-- Fixed navbar -->
     <nav>
       <ul class="navigation">
-        <li><a href="<%=content.rootpath ?: ''%>">Home</a></li>
+        <li><a href="<%=content.rootpath ?: ''%>/">Home</a></li>
         <li><a href="<%=content.rootpath ?: ''%>about.html">About</a></li>
         <li><a href="<%=content.rootpath ?: ''%>${config.feed_file}">Feed</a></li>
         <li><a href="https://github.com/danhyun" target="_blank"><i class="icon-2x icon-github"></i></a></li>

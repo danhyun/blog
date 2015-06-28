@@ -5,7 +5,7 @@ Danny Hyun
 ~~~~~~
 
 Dan Hyun is a software engineer who is passionate about all aspects of software development.
-Java, JVM based languages like Groovy, and Javascript are his focus but he dabbles in Ruby and Python from time to time.
+He mainly focuses on Java, JVM based languages like Groovy, and Javascript but he dabbles in Ruby and Python from time to time.
 He is an OSS proponent and an active member of the https://ratpack.io[Ratpack] core team.
 
 == Talks
