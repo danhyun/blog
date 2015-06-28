@@ -30,7 +30,7 @@ watch {
   }
 }
 
-task publish(type: GradleBuild) {
+task publish(dependsOn: 'jbake', type: GradleBuild) {
   buildFile = 'publish.gradle'
   tasks = ['publishGhPages']
 }
